@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Spawner GUI</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    label, select, input, button { display: block; margin: 10px 0; }
+    textarea { width: 100%; height: 200px; }
+  </style>
+</head>
+<body>
+  <h1>Item Spawner GUI (Web Version)</h1>
+
+  <label>Bag Type:
+    <select id="bagType"></select>
+  </label>
+  <label>Item Count:
+    <input type="number" id="itemCount" value="10" />
+  </label>
+  <label>Color Preset:
+    <select id="colorPreset">
+      <option value="random">Random</option>
+      <option value="galaxy">Galaxy</option>
+      <option value="red">Red</option>
+      <option value="orange">Orange</option>
+      <option value="yellow">Yellow</option>
+      <option value="green">Green</option>
+      <option value="cyan">Cyan</option>
+      <option value="blue">Blue</option>
+      <option value="white">White</option>
+    </select>
+  </label>
+  <label>Scale Mode:
+    <select id="scaleMode">
+      <option value="random">Random</option>
+      <option value="tiny">Tiny</option>
+      <option value="small">Small</option>
+      <option value="normal">Normal</option>
+      <option value="big">Big</option>
+      <option value="large">Large</option>
+    </select>
+  </label>
+  <label>Item ID:
+    <select id="itemId"></select>
+  </label>
+
+  <button onclick="generateJSON()">Generate JSON</button>
+  <textarea id="output" readonly></textarea>
+
+  <script>
+    const colorPresets = {
+      galaxy: [180, 117],
+      red: [0, 120],
+      orange: [10, 100],
+      yellow: [32, 120],
+      green: [58, 120],
+      cyan: [120, 120],
+      blue: [159, 120],
+      white: [0, 0]
+    };
+
+    const scalePresets = {
+      tiny: -128, small: -64, normal: 0, big: 64, large: 127
+    };
+
+    const bagList = ["item_backpack_small_base", "item_backpack_large_base"];
+    const itemList = ["item_banana", "item_pumpkin_pie", "item_shredder", "item_shotgun_basic"];
+
+    const bagType = document.getElementById("bagType");
+    const itemId = document.getElementById("itemId");
+    bagList.forEach(b => bagType.innerHTML += `<option value="${b}">${b}</option>`);
+    itemList.forEach(i => itemId.innerHTML += `<option value="${i}">${i}</option>`);
+
+    function generateJSON() {
+      const bag = bagType.value;
+      const item = itemId.value;
+      const count = parseInt(document.getElementById("itemCount").value);
+      const colorMode = document.getElementById("colorPreset").value;
+      const scaleMode = document.getElementById("scaleMode").value;
+
+      const [hue, sat] = colorMode === "random"
+        ? [Math.floor(Math.random() * 211), Math.floor(Math.random() * 121)]
+        : colorPresets[colorMode];
+      const scale = scaleMode === "random"
+        ? Math.floor(Math.random() * 256) - 128
+        : scalePresets[scaleMode];
+
+      const children = [];
+      for (let i = 0; i < count; i++) {
+        children.push({
+          itemID: item,
+          colorHue: hue,
+          colorSaturation: sat,
+          scaleModifier: scale
+        });
+      }
+
+      const data = {
+        leftHand: {},
+        rightHand: { itemID: bag, children },
+        leftHip: {}, rightHip: {}, back: {}
+      };
+
+      document.getElementById("output").value = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
